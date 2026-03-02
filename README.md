@@ -4,7 +4,7 @@ An interactive CLI tool for predicting diabetes risk and managing patient record
 # 🩺 Interactive Diabetes Risk Assessment & Management System
 
 **Author:** Rupam Roy  
-**Environment:** Kali Linux (Raspberry Pi 5) / Python 3.x
+**Environment:** Linux (Raspberry Pi 5) / Python 3.x
 
 ## 📌 Project Overview
 This project is a standalone, terminal-based clinical application that combines **Machine Learning** with an **Electronic Health Record (EHR)** management system. It utilizes the Pima Indians Diabetes Dataset to predict the probability of a patient developing diabetes using a Gaussian Naive Bayes classification algorithm. 

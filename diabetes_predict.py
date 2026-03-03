@@ -133,8 +133,9 @@ def get_date(prompt):
 
 # --- 3. DATABASE HELPER FUNCTIONS ---
 def check_duplicate_id(p_id, full_name):
+    """Now returns a tuple: (is_valid, previous_gender)"""
     if not os.path.exists(DATABASE_FILE) or os.stat(DATABASE_FILE).st_size == 0:
-        return True 
+        return True, None 
         
     df = pd.read_csv(DATABASE_FILE)
     df['ID'] = df['ID'].astype(str)
@@ -159,15 +160,15 @@ def check_duplicate_id(p_id, full_name):
                 if ans == 'exit':
                     raise AbortEntry()
                 if ans == 'yes':
-                    return True
+                    return True, str(row['Gender']).upper() # Returns the stored gender
                 elif ans == 'no':
-                    return False
+                    return False, None
                 else:
                     print("\n(!) Invalid input type again ...\n")
         else:
-            return False 
+            return False, None 
             
-    return True
+    return True, None
 
 def view_previous_data():
     clear()
@@ -255,7 +256,6 @@ def view_previous_data():
 
                 # --- BULLETPROOF CASE-INSENSITIVE NAME SEARCH ---
                 if actual_col.lower() == 'name':
-                    # .str.lower() ensures the database string is treated as lowercase during the check
                     filtered_df = df[(df['Name'].str.lower() == val) | (df['First Name'].str.lower().str.startswith(val))]
                 else:
                     filtered_df = df[df[actual_col].astype(str).str.lower() == val]
@@ -317,18 +317,26 @@ def enter_new_patient():
         first_name = name_parts[0]
         last_name = name_parts[1]
         
+        # Checking duplicate now returns the previously saved gender (if it exists)
+        fetched_gender = None
         while True:
             p_id = get_string("Enter Patient ID: ", enforce_digit=True)
-            if check_duplicate_id(p_id, p_name):
+            is_valid, fetched_gender = check_duplicate_id(p_id, p_name)
+            if is_valid:
                 break
             else:
                 print("\n(!) Dublicate id type again.....\n")
 
-        while True:
-            gender = get_string("Enter Patient Gender (M/F): ").upper()
-            if gender in ['M', 'F']:
-                break
-            print("\n(!) Invalid input type again ...\n")
+        # Auto-fill gender if the person is already in the database
+        if fetched_gender:
+            gender = fetched_gender
+            print(f"\n[*] Recognized returning patient. Auto-filling gender: {gender}")
+        else:
+            while True:
+                gender = get_string("Enter Patient Gender (M/F): ").upper()
+                if gender in ['M', 'F']:
+                    break
+                print("\n(!) Invalid input type again ...\n")
             
         v8 = get_age("Enter Age: ")
 
